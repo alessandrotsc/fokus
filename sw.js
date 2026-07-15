@@ -1,4 +1,4 @@
-const CACHE='fokus-v1';
+const CACHE='fokus-v2';
 const ASSETS=['./','./index.html','./manifest.webmanifest',
   './assets/icon-192.png','./assets/icon-512.png','./assets/icon-180.png'];
 self.addEventListener('install',e=>{

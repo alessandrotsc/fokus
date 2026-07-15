@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0B76D1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fokus">
+<title>Fokus</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0B76D1; --primary-dark:#075AA5; --cyan:#18C7D8; --sky:#38BDF8;
+  --accent:#7DD3FC; --kante:#05416F; --gold:#C8A24A;
+  --bg:#F4FBFF; --ink:#101828; --muted:#5b6b7d; --line:#e2ecf5; --paper:#ffffff;
+  --grad:linear-gradient(135deg,var(--primary),var(--cyan));
+  --grad-soft:linear-gradient(135deg,#eaf6ff,#f4fbff);
+  --shadow:0 10px 30px -12px rgba(11,118,209,.28);
+  --shadow-lg:0 22px 50px -20px rgba(11,118,209,.40);
+  --r:22px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1100px 480px at 100% -8%,#e2f1ff 0%,rgba(226,241,255,0) 60%),
+    radial-gradient(900px 420px at -10% 4%,#e8fbfd 0%,rgba(232,251,253,0) 55%),
+    var(--bg);
+  background-attachment:fixed;
+  min-height:100dvh;
+  -webkit-user-select:none;user-select:none;
+  overflow-x:hidden;
+}
+.wrap{max-width:560px;margin:0 auto;padding:calc(var(--safe-top) + 18px) 18px calc(var(--safe-bottom) + 120px)}
+
+/* ---------- Header ---------- */
+header{display:flex;align-items:center;gap:14px;margin:6px 2px 20px}
+.logo{width:52px;height:52px;flex:0 0 auto;filter:drop-shadow(0 8px 16px rgba(11,118,209,.30))}
+.brand h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.5px}
+.brand .date{margin:2px 0 0;font-size:13.5px;font-weight:600;color:var(--muted);text-transform:capitalize}
+
+/* ---------- Progress card ---------- */
+.hero{
+  position:relative;background:var(--grad);border-radius:26px;padding:20px 22px;
+  color:#fff;box-shadow:var(--shadow-lg);margin-bottom:22px;overflow:hidden;
+}
+.hero::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(220px 140px at 90% -20%,rgba(255,255,255,.35),transparent 70%);pointer-events:none}
+.hero-row{display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+.ring{width:82px;height:82px;flex:0 0 auto;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800}
+.hero-txt h2{margin:0;font-size:17px;font-weight:700}
+.hero-txt p{margin:4px 0 0;font-size:13.5px;font-weight:500;opacity:.92;line-height:1.35}
+.streak{display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:700}
+
+/* ---------- Section label ---------- */
+.sec{display:flex;align-items:center;justify-content:space-between;margin:0 4px 12px}
+.sec h3{margin:0;font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.2px;text-transform:uppercase}
+.sec .count{font-size:13px;font-weight:700;color:var(--primary)}
+
+/* ---------- Task card ---------- */
+.tasks{display:flex;flex-direction:column;gap:14px}
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 16px 15px;box-shadow:var(--shadow);position:relative;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s;
+}
+.card.done{background:linear-gradient(180deg,#f6fdf8,#ffffff);border-color:#cdeede}
+.card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.emoji{
+  width:44px;height:44px;flex:0 0 auto;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;font-size:23px;background:var(--grad-soft);border:1px solid var(--line);
+}
+.card.done .emoji{background:linear-gradient(135deg,#e2f7ea,#f2fdf6);border-color:#cdeede}
+.card-name{flex:1;min-width:0}
+.card-name .t{font-size:16.5px;font-weight:700;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-name .s{font-size:12.5px;font-weight:600;color:var(--muted);margin-top:2px}
+.menu-btn{
+  width:34px;height:34px;flex:0 0 auto;border:none;background:transparent;color:var(--muted);
+  border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:20px;transition:background .15s;
+}
+.menu-btn:active{background:var(--line)}
+
+/* ---------- Slots ---------- */
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.slot{
+  appearance:none;border:1.5px solid var(--line);background:#fbfdff;border-radius:16px;
+  padding:12px 6px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;
+  transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .16s,background .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.slot:active{transform:scale(.94)}
+.slot .ic{
+  width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:19px;background:#fff;border:1.5px solid var(--line);color:var(--muted);
+  transition:all .22s cubic-bezier(.2,.8,.2,1);position:relative;
+}
+.slot .lbl{font-size:12px;font-weight:700;color:var(--muted);transition:color .2s}
+.slot .check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(.4);transition:all .28s cubic-bezier(.34,1.56,.64,1)}
+.slot .check svg{width:20px;height:20px}
+.slot .glyph{transition:opacity .18s,transform .18s}
+
+.slot.on{background:linear-gradient(180deg,#eef8ff,#ffffff);border-color:var(--sky);box-shadow:0 8px 18px -10px rgba(11,118,209,.45)}
+.slot.on .ic{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 6px 14px -4px rgba(11,118,209,.6)}
+.slot.on .ic .glyph{opacity:0;transform:scale(.5)}
+.slot.on .ic .check{opacity:1;transform:scale(1)}
+.slot.on .lbl{color:var(--primary)}
+
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.slot.pop .ic{animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+
+/* ---------- Empty state ---------- */
+.empty{text-align:center;padding:46px 24px;color:var(--muted)}
+.empty .big{font-size:44px;margin-bottom:10px}
+.empty p{margin:0;font-size:15px;font-weight:600;line-height:1.5}
+
+/* ---------- FAB ---------- */
+.fab{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-bottom) + 22px);
+  z-index:30;border:none;cursor:pointer;
+  background:var(--grad);color:#fff;font-weight:700;font-size:15.5px;
+  padding:15px 26px 15px 22px;border-radius:999px;display:flex;align-items:center;gap:9px;
+  box-shadow:0 16px 34px -10px rgba(11,118,209,.6);
+  transition:transform .16s cubic-bezier(.2,.8,.2,1);
+}
+.fab:active{transform:translateX(-50%) scale(.95)}
+.fab svg{width:20px;height:20px}
+
+/* ---------- Sheet ---------- */
+.scrim{position:fixed;inset:0;background:rgba(16,24,40,.42);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .28s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--paper);
+  border-radius:28px 28px 0 0;padding:10px 20px calc(var(--safe-bottom) + 26px);
+  box-shadow:0 -20px 50px -20px rgba(16,24,40,.4);
+  transform:translateY(105%);transition:transform .34s cubic-bezier(.2,.9,.25,1);
+  max-width:560px;margin:0 auto;
+}
+.sheet.open{transform:translateY(0)}
+.grip{width:42px;height:5px;border-radius:99px;background:var(--line);margin:8px auto 16px}
+.sheet h3{margin:0 0 16px;font-size:20px;font-weight:800;letter-spacing:-.3px}
+.field-lbl{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin:0 0 8px}
+input.name{
+  width:100%;border:1.5px solid var(--line);background:#fbfdff;border-radius:15px;
+  padding:15px 16px;font-size:16px;font-weight:600;font-family:inherit;color:var(--ink);
+  outline:none;transition:border-color .15s,box-shadow .15s;-webkit-user-select:text;user-select:text;
+}
+input.name:focus{border-color:var(--sky);box-shadow:0 0 0 4px rgba(56,189,248,.16);background:#fff}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin:10px 0 4px}
+.emoji-opt{
+  aspect-ratio:1;border:1.5px solid var(--line);background:#fbfdff;border-radius:13px;
+  font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .14s;
+}
+.emoji-opt:active{transform:scale(.9)}
+.emoji-opt.sel{border-color:var(--primary);background:var(--grad-soft);box-shadow:0 0 0 3px rgba(11,118,209,.14)}
+.sheet-actions{display:flex;gap:11px;margin-top:22px}
+.btn{
+  flex:1;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:16px;
+  padding:16px;border-radius:16px;transition:transform .14s;
+}
+.btn:active{transform:scale(.96)}
+.btn.ghost{background:var(--line);color:var(--ink);flex:0 0 auto;padding:16px 22px}
+.btn.primary{background:var(--grad);color:#fff;box-shadow:0 12px 26px -10px rgba(11,118,209,.6)}
+.btn.danger{background:#fdeceb;color:#c0392b}
+
+.field{margin-bottom:18px}
+.mgmt-row{display:flex;gap:11px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0B76D1"/><stop offset="1" stop-color="#18C7D8"/>
+        </linearGradient>
+      </defs>
+      <rect x="8" y="8" width="84" height="84" rx="24" fill="url(#lg)"/>
+      <rect x="8" y="8" width="84" height="84" rx="24" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>
+      <path d="M31 50.5 L44 62 L70 36" stroke="#fff" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="brand">
+      <h1>Fokus</h1>
+      <p class="date" id="dateLabel"></p>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-row">
+      <div class="ring">
+        <svg width="82" height="82" viewBox="0 0 82 82">
+          <circle cx="41" cy="41" r="34" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="9"/>
+          <circle id="ringFill" cx="41" cy="41" r="34" fill="none" stroke="#fff" stroke-width="9"
+            stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+            style="transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)"/>
+        </svg>
+        <div class="pct" id="ringPct">0%</div>
+      </div>
+      <div class="hero-txt">
+        <h2 id="heroTitle">Los geht's</h2>
+        <p id="heroSub">Trag deinen ersten Durchlauf ein.</p>
+        <span class="streak" id="streakBadge" style="display:none">🔥 <span id="streakNum">0</span> Tage in Folge</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Heute</h3>
+    <span class="count" id="doneCount"></span>
+  </div>
+
+  <div class="tasks" id="taskList"></div>
+</div>
+
+<button class="fab" id="addFab">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+  Aufgabe
+</button>
+
+<!-- Sheet: Aufgabe hinzufügen / bearbeiten -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="grip"></div>
+  <h3 id="sheetTitle">Neue Aufgabe</h3>
+  <div class="field">
+    <p class="field-lbl">Name</p>
+    <input class="name" id="nameInput" type="text" placeholder="z.B. Italienisch Vokabeln" maxlength="40" autocomplete="off">
+  </div>
+  <div class="field">
+    <p class="field-lbl">Symbol</p>
+    <div class="emoji-grid" id="emojiGrid"></div>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn ghost" id="cancelBtn">Abbrechen</button>
+    <button class="btn primary" id="saveBtn">Hinzufügen</button>
+  </div>
+  <div class="mgmt-row" id="deleteRow" style="display:none">
+    <button class="btn danger" id="deleteBtn" style="flex:1">Aufgabe löschen</button>
+  </div>
+</div>
+
+<script>
+const SLOTS=[
+  {key:'morning', lbl:'Morgens', glyph:'🌅'},
+  {key:'noon',    lbl:'Mittags', glyph:'☀️'},
+  {key:'evening', lbl:'Abends',  glyph:'🌙'},
+];
+const EMOJIS=['🗣️','🎹','🎸','🎤','📖','✍️','🧠','🇮🇹','🎧','🏋️','🧘','🏃','💧','📚','🎯','🎨','🧩','🔤','🎵','🍎','☕','🌿','⏱️','💡','📝','🎼','🥁','🎻'];
+const KEY='fokus.state.v1';
+const $=s=>document.querySelector(s);
+let _uidc=0;
+
+let state=load();
+let editingId=null;
+let pickedEmoji=EMOJIS[0];
+
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.tasks)return s;}catch(e){}
+  return {tasks:[
+    {id:uid(),name:'Sprache lernen',emoji:'🗣️'},
+    {id:uid(),name:'Instrument üben',emoji:'🎹'},
+    {id:uid(),name:'Singen',emoji:'🎤'},
+  ], log:{}, streak:0, lastFull:null};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+function uid(){return 'x'+Date.now().toString(36)+'_'+(_uidc++);}
+function haptic(ms){if(navigator.vibrate)navigator.vibrate(ms);}
+
+function dayLog(){const k=todayKey();if(!state.log[k])state.log[k]={};return state.log[k];}
+function isOn(taskId,slot){const dl=state.log[todayKey()];return !!(dl&&dl[taskId]&&dl[taskId][slot]);}
+function toggle(taskId,slot){
+  const dl=dayLog();
+  if(!dl[taskId])dl[taskId]={};
+  dl[taskId][slot]=!dl[taskId][slot];
+  updateStreak();
+  save();
+  return dl[taskId][slot];
+}
+
+function totals(){
+  let total=state.tasks.length*3, done=0;
+  const dl=state.log[todayKey()]||{};
+  state.tasks.forEach(t=>{const r=dl[t.id];if(r)SLOTS.forEach(s=>{if(r[s.key])done++;});});
+  return {total,done};
+}
+function taskDone(t){const dl=state.log[todayKey()]||{};const r=dl[t.id]||{};return SLOTS.every(s=>r[s.key]);}
+
+function keyOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fullOn(d){
+  const dl=state.log[keyOf(d)];
+  return state.tasks.length>0 && dl && state.tasks.every(t=>{const r=dl[t.id];return r&&SLOTS.every(s=>r[s.key]);});
+}
+function updateStreak(){
+  // Streak = aufeinanderfolgende komplett erledigte Tage. Heute zaehlt nur mit, wenn schon komplett;
+  // ein noch offener heutiger Tag bricht die Serie aber nicht.
+  let streak=0;const d=new Date();
+  if(!fullOn(d))d.setDate(d.getDate()-1);
+  let guard=0;
+  while(fullOn(d)&&guard<400){streak++;d.setDate(d.getDate()-1);guard++;}
+  state.streak=streak;
+}
+
+/* ---------- Render ---------- */
+function fmtDate(){
+  const d=new Date();
+  const wd=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'][d.getDay()];
+  const mo=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][d.getMonth()];
+  return wd+', '+d.getDate()+'. '+mo;
+}
+
+function render(){
+  $('#dateLabel').textContent=fmtDate();
+  const {total,done}=totals();
+  const pct=total?Math.round(done/total*100):0;
+  const C=2*Math.PI*34;
+  $('#ringFill').setAttribute('stroke-dasharray',C.toFixed(1));
+  $('#ringFill').style.strokeDashoffset=(C*(1-done/(total||1))).toFixed(1);
+  $('#ringPct').textContent=pct+'%';
+  $('#doneCount').textContent=done+' / '+total+' Durchläufe';
+
+  const finishedTasks=state.tasks.filter(taskDone).length;
+  if(done===0){$('#heroTitle').textContent="Los geht's";$('#heroSub').textContent='Trag deinen ersten Durchlauf ein.';}
+  else if(done<total){$('#heroTitle').textContent='Dranbleiben';$('#heroSub').textContent=finishedTasks>0?finishedTasks+' von '+state.tasks.length+' Aufgaben komplett.':'Schon '+done+' Durchläufe geschafft.';}
+  else{$('#heroTitle').textContent='Alles erledigt 🎉';$('#heroSub').textContent='Starker Tag. Weiter so morgen.';}
+
+  updateStreak();
+  const sb=$('#streakBadge');
+  if(state.streak>=2){sb.style.display='inline-flex';$('#streakNum').textContent=state.streak;}
+  else sb.style.display='none';
+
+  const list=$('#taskList');
+  if(state.tasks.length===0){
+    list.innerHTML='<div class="empty"><div class="big">📋</div><p>Noch keine Aufgaben.<br>Tippe unten auf <b>Aufgabe</b>, um deine erste Routine anzulegen.</p></div>';
+    return;
+  }
+  list.innerHTML='';
+  state.tasks.forEach(t=>{
+    const dl=state.log[todayKey()]||{};const r=dl[t.id]||{};
+    const dcount=SLOTS.filter(s=>r[s.key]).length;
+    const card=document.createElement('div');
+    card.className='card'+(taskDone(t)?' done':'');
+    card.innerHTML=`
+      <div class="card-top">
+        <div class="emoji">${t.emoji}</div>
+        <div class="card-name">
+          <div class="t">${esc(t.name)}</div>
+          <div class="s">${dcount}/3 Durchläufe · je 15 Min</div>
+        </div>
+        <button class="menu-btn" data-edit="${t.id}" aria-label="Bearbeiten">⋯</button>
+      </div>
+      <div class="slots">
+        ${SLOTS.map(s=>`
+          <button class="slot${r[s.key]?' on':''}" data-task="${t.id}" data-slot="${s.key}">
+            <span class="ic">
+              <span class="glyph">${s.glyph}</span>
+              <span class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5 L10 17.5 L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+            <span class="lbl">${s.lbl}</span>
+          </button>`).join('')}
+      </div>`;
+    list.appendChild(card);
+  });
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- Interactions ---------- */
+$('#taskList').addEventListener('click',e=>{
+  const slot=e.target.closest('.slot');
+  if(slot){
+    const on=toggle(slot.dataset.task,slot.dataset.slot);
+    haptic(on?[12]:8);
+    slot.classList.toggle('on',on);
+    if(on){slot.classList.remove('pop');void slot.offsetWidth;slot.classList.add('pop');}
+    // Card-Status & Hero live aktualisieren
+    render();
+    return;
+  }
+  const edit=e.target.closest('[data-edit]');
+  if(edit){openSheet(edit.dataset.edit);}
+});
+
+/* ---------- Sheet ---------- */
+function buildEmojiGrid(){
+  const g=$('#emojiGrid');g.innerHTML='';
+  EMOJIS.forEach(em=>{
+    const b=document.createElement('button');
+    b.className='emoji-opt'+(em===pickedEmoji?' sel':'');
+    b.textContent=em;b.type='button';
+    b.onclick=()=>{pickedEmoji=em;[...g.children].forEach(c=>c.classList.toggle('sel',c===b));haptic(6);};
+    g.appendChild(b);
+  });
+}
+function openSheet(id){
+  editingId=id||null;
+  if(editingId){
+    const t=state.tasks.find(x=>x.id===editingId);
+    $('#sheetTitle').textContent='Aufgabe bearbeiten';
+    $('#saveBtn').textContent='Speichern';
+    $('#nameInput').value=t.name;pickedEmoji=t.emoji;
+    $('#deleteRow').style.display='flex';
+  }else{
+    $('#sheetTitle').textContent='Neue Aufgabe';
+    $('#saveBtn').textContent='Hinzufügen';
+    $('#nameInput').value='';pickedEmoji=EMOJIS[0];
+    $('#deleteRow').style.display='none';
+  }
+  buildEmojiGrid();
+  $('#scrim').classList.add('open');$('#sheet').classList.add('open');
+}
+function closeSheet(){$('#scrim').classList.remove('open');$('#sheet').classList.remove('open');$('#nameInput').blur();}
+
+$('#addFab').onclick=()=>{openSheet(null);setTimeout(()=>$('#nameInput').focus(),320);};
+$('#cancelBtn').onclick=closeSheet;
+$('#scrim').onclick=closeSheet;
+$('#saveBtn').onclick=()=>{
+  const name=$('#nameInput').value.trim();
+  if(!name){$('#nameInput').focus();haptic(20);return;}
+  if(editingId){
+    const t=state.tasks.find(x=>x.id===editingId);t.name=name;t.emoji=pickedEmoji;
+  }else{
+    state.tasks.push({id:uid(),name,emoji:pickedEmoji});
+  }
+  save();render();closeSheet();haptic([10]);
+};
+$('#deleteBtn').onclick=()=>{
+  if(!editingId)return;
+  state.tasks=state.tasks.filter(x=>x.id!==editingId);
+  // Log-Einträge der Aufgabe bleiben unberührt (schadet nicht)
+  save();render();closeSheet();haptic([15,30,15]);
+};
+$('#nameInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#saveBtn').click();}});
+
+/* ---------- Tageswechsel automatisch erkennen ---------- */
+let curDay=todayKey();
+function checkDayChange(){if(todayKey()!==curDay){curDay=todayKey();render();}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkDayChange();});
+setInterval(checkDayChange,60000);
+
+render();
+
+/* ---------- PWA ---------- */
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>

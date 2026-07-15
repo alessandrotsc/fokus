@@ -127,6 +127,9 @@ header{display:flex;align-items:center;gap:14px;margin:6px 2px 18px}
 .trow.done .bigcheck svg{opacity:1;transform:scale(1)}
 @keyframes pop{0%{transform:scale(1)}42%{transform:scale(1.16)}100%{transform:scale(1)}}
 .bigcheck.pop{animation:pop .42s cubic-bezier(.34,1.56,.64,1)}
+.trow.dragging{z-index:5;opacity:.98;border-color:var(--sky);
+  box-shadow:0 26px 46px -14px rgba(11,118,209,.5);cursor:grabbing}
+.tasks.reordering .trow:not(.dragging){opacity:.92}
 
 /* ---------- Empty state ---------- */
 .empty{text-align:center;padding:44px 24px;color:var(--muted)}
@@ -431,17 +434,98 @@ $('#tabs').addEventListener('click',e=>{
   currentTab=tab.dataset.time;haptic(6);render();
 });
 
-$('#taskList').addEventListener('click',e=>{
-  const edit=e.target.closest('[data-edit]');
-  if(edit){e.stopPropagation();openSheet(edit.dataset.edit);return;}
+/* Tippen = abhaken. Gedrueckt halten = verschieben (Reihenfolge aendern). */
+const listEl=$('#taskList');
+let g=null;              // aktueller Gesten-Zustand
+let suppressClick=false; // verhindert Toggle direkt nach Drag/Edit
+
+listEl.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(e.target.closest('.emenu'))return;           // Bearbeiten-Button
   const row=e.target.closest('.trow');if(!row)return;
+  const rows=[...listEl.querySelectorAll('.trow')];
+  const step=rows.length>1
+    ? rows[1].getBoundingClientRect().top-rows[0].getBoundingClientRect().top
+    : row.getBoundingClientRect().height+12;
+  g={row,rows,index:rows.indexOf(row),curIndex:rows.indexOf(row),step,
+     startX:e.clientX,startY:e.clientY,dragging:false,pointerId:e.pointerId,
+     timer:setTimeout(startDrag,400)};
+});
+
+function startDrag(){
+  if(!g)return;
+  g.dragging=true;suppressClick=true;haptic(24);
+  try{g.row.setPointerCapture(g.pointerId);}catch(_){}
+  listEl.style.touchAction='none';
+  listEl.parentElement && listEl.classList.add('reordering');
+  g.row.style.transition='none';
+  g.row.classList.add('dragging');
+  g.rows.forEach(r=>{if(r!==g.row)r.style.transition='transform .18s cubic-bezier(.2,.8,.2,1)';});
+}
+
+window.addEventListener('pointermove',e=>{
+  if(!g||e.pointerId!==g.pointerId)return;
+  const dx=e.clientX-g.startX, dy=e.clientY-g.startY;
+  if(!g.dragging){
+    if(Math.hypot(dx,dy)>10){clearTimeout(g.timer);g=null;} // Bewegung => Scrollen, keine Geste
+    return;
+  }
+  e.preventDefault();
+  g.row.style.transform=`translateY(${dy}px) scale(1.03)`;
+  let ni=Math.max(0,Math.min(g.rows.length-1,g.index+Math.round(dy/g.step)));
+  if(ni!==g.curIndex){
+    g.curIndex=ni;
+    g.rows.forEach((r,j)=>{
+      if(r===g.row)return;
+      let t=0;
+      if(g.index<ni && j>g.index && j<=ni)t=-g.step;
+      else if(g.index>ni && j<g.index && j>=ni)t=g.step;
+      r.style.transform=t?`translateY(${t}px)`:'';
+    });
+  }
+},{passive:false});
+
+function endGesture(e){
+  if(!g||e.pointerId!==g.pointerId)return;
+  clearTimeout(g.timer);
+  const row=g.row, wasDragging=g.dragging, from=g.index, to=g.curIndex;
+  try{row.releasePointerCapture(g.pointerId);}catch(_){}
+  listEl.style.touchAction='';listEl.classList.remove('reordering');
+  g=null;
+  if(wasDragging){applyReorder(from,to);render();return;}
+  // kurzer Tap ohne Bewegung => abhaken
   const on=toggle(row.dataset.id,currentTab);
   haptic(on?[13]:8);
   row.classList.toggle('done',on);
   const bc=row.querySelector('.bigcheck');
   if(on){bc.classList.remove('pop');void bc.offsetWidth;bc.classList.add('pop');}
   render();
+}
+window.addEventListener('pointerup',endGesture);
+window.addEventListener('pointercancel',e=>{
+  if(!g||e.pointerId!==g.pointerId)return;
+  clearTimeout(g.timer);
+  try{g.row.releasePointerCapture(g.pointerId);}catch(_){}
+  const dragging=g.dragging;
+  listEl.style.touchAction='';listEl.classList.remove('reordering');g=null;
+  if(dragging)render();
 });
+
+listEl.addEventListener('click',e=>{
+  const edit=e.target.closest('[data-edit]');
+  if(edit){suppressClick=false;openSheet(edit.dataset.edit);return;}
+  if(suppressClick){suppressClick=false;e.stopPropagation();}
+});
+
+function applyReorder(from,to){
+  if(from===to)return;
+  const visible=tasksFor(currentTab);
+  const slots=visible.map(t=>state.tasks.indexOf(t)).sort((a,b)=>a-b);
+  const moved=visible.splice(from,1)[0];
+  visible.splice(to,0,moved);
+  slots.forEach((slot,k)=>{state.tasks[slot]=visible[k];});
+  save();haptic([8]);
+}
 
 /* ---------- Sheet ---------- */
 function buildEmojiGrid(){
